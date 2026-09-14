@@ -1,8 +1,9 @@
 import { supabase } from "../lib/supabaseClient";
 
-// =========================
+
+// ==========================================
 // SIGN UP
-// =========================
+// ==========================================
 
 export async function signUpUser({
   email,
@@ -13,10 +14,15 @@ export async function signUpUser({
   phone,
   address,
 }) {
+
+  // ------------------------------------------
   // 1. Create Supabase Auth user
+  // ------------------------------------------
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
+
     options: {
       data: {
         full_name: fullName,
@@ -35,7 +41,11 @@ export async function signUpUser({
     throw new Error("User was not created");
   }
 
-  // 2. Create profile
+
+  // ------------------------------------------
+  // 2. Create common profile
+  // ------------------------------------------
+
   const { error: profileError } = await supabase
     .from("profiles")
     .insert({
@@ -50,14 +60,17 @@ export async function signUpUser({
     throw profileError;
   }
 
-  // 3. Create consumer record
+
+  // ------------------------------------------
+  // 3. Create consumer information
+  // ------------------------------------------
+
   if (userType === "consumer") {
+
     const { error: consumerError } = await supabase
       .from("consumers")
       .insert({
         user_id: user.id,
-        full_name: fullName,
-        email: email,
         phone: phone,
         address: address,
       });
@@ -68,15 +81,19 @@ export async function signUpUser({
     }
   }
 
-  // 4. Create company record
+
+  // ------------------------------------------
+  // 4. Create company information
+  // ------------------------------------------
+
   if (userType === "company") {
+
     const { error: companyError } = await supabase
       .from("companies")
       .insert({
         user_id: user.id,
         company_name: companyName,
         contact_name: fullName,
-        email: email,
         phone: phone,
         address: address,
       });
@@ -87,19 +104,26 @@ export async function signUpUser({
     }
   }
 
+
+  // ------------------------------------------
+  // 5. Return created user
+  // ------------------------------------------
+
   return user;
 }
 
 
-// =========================
+// ==========================================
 // LOGIN
-// =========================
+// ==========================================
 
 export async function loginUser({ email, password }) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
+
+  const { data, error } =
+    await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
   if (error) {
     console.error("Supabase login error:", error);
@@ -110,45 +134,107 @@ export async function loginUser({ email, password }) {
 }
 
 
-// =========================
-// GET USER PROFILE
-// =========================
+// ==========================================
+// GET CURRENT AUTH USER
+// ==========================================
 
-export async function getUserProfile() {
-  // Get currently logged-in Auth user
+export async function getCurrentUser() {
+
   const {
     data: { user },
-    error: userError,
+    error,
   } = await supabase.auth.getUser();
 
-  if (userError) {
-    throw userError;
+  if (error) {
+    throw error;
   }
 
   if (!user) {
     throw new Error("No logged-in user found");
   }
 
-  console.log("Authenticated user ID:", user.id);
+  return user;
+}
 
-  // Get matching profile
-  const { data: profile, error: profileError } = await supabase
+
+// ==========================================
+// GET COMMON USER PROFILE
+// ==========================================
+
+export async function getUserProfile() {
+
+  const user = await getCurrentUser();
+
+  const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
-    .maybeSingle();
+    .single();
 
-  if (profileError) {
-    console.error("Profile fetch error:", profileError);
-    throw profileError;
+  if (error) {
+    console.error("Profile fetch error:", error);
+    throw error;
   }
-
-  if (!profile) {
-    console.error("No profile found for:", user.id);
-    throw new Error("Profile not found for this user");
-  }
-
-  console.log("Profile:", profile);
 
   return profile;
+}
+
+
+// ==========================================
+// GET CONSUMER INFORMATION
+// ==========================================
+
+export async function getConsumerProfile() {
+
+  const user = await getCurrentUser();
+
+  const { data: consumer, error } = await supabase
+    .from("consumers")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Consumer fetch error:", error);
+    throw error;
+  }
+
+  return consumer;
+}
+
+
+// ==========================================
+// GET COMPANY INFORMATION
+// ==========================================
+
+export async function getCompanyProfile() {
+
+  const user = await getCurrentUser();
+
+  const { data: company, error } = await supabase
+    .from("companies")
+    .select("*")
+    .eq("user_id", user.id)
+    .single();
+
+  if (error) {
+    console.error("Company fetch error:", error);
+    throw error;
+  }
+
+  return company;
+}
+
+
+// ==========================================
+// LOGOUT
+// ==========================================
+
+export async function logoutUser() {
+
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    throw error;
+  }
 }
