@@ -437,7 +437,7 @@ const ClaimForm = () => {
         <button
           type="button"
           className="back-button"
-          onClick={() => navigate("/consumer-dashboard")}
+          onClick={() => navigate("/consumer/dashboard")}
         >
           Back to Dashboard
         </button>

@@ -212,6 +212,52 @@ export async function getCompanies() {
   return companies;
 }
 
+export async function getUserClaims() {
+  const user = await getCurrentUser();
+
+  const { data: claims, error } = await supabase
+    .from("warranty_claims")
+    .select(`
+      *,
+      companies (
+        company_name
+      )
+    `)
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Claims fetch error:", error);
+    throw error;
+  }
+
+  return claims;
+}
+
+export async function getCompanyClaims() {
+  const companyProfile = await getCompanyProfile();
+
+  const { data: claims, error } = await supabase
+    .from("warranty_claims")
+    .select(`
+      *,
+      profiles:user_id (
+        full_name,
+        email
+      )
+    `)
+    .eq("company_id", companyProfile.user_id)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Company claims fetch error:", error);
+    throw error;
+  }
+
+  console.log("Company claims:", claims);
+
+  return claims;
+}
 
 // ============================================
 // CREATE WARRANTY CLAIM
