@@ -45,6 +45,11 @@ const ConsumerDashboard = () => {
       <p>Email: {profile.email}</p>
       <p>Phone: {consumerProfile.phone}</p>
       <p>Address: {consumerProfile.address}</p>
+      <button onClick={() => navigate("/ClaimForm")}>
+        Go to Claim Form
+      </button>
+      <br />
+      <br />
       <button onClick={handleLogout}>
         Logout
       </button>
