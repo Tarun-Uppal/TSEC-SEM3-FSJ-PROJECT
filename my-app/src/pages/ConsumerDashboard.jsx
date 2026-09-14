@@ -1,9 +1,22 @@
 import React, { useEffect, useState } from "react";
 import {
-  getUserProfile,getConsumerProfile,
+  getUserProfile, getConsumerProfile, logoutUser
 } from "../services/authService";
 
+import { useNavigate } from "react-router";
+
+
 const ConsumerDashboard = () => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const [profile, setProfile] = useState(null);
   const [consumerProfile, setConsumerProfile] = useState(null);
 
@@ -32,8 +45,13 @@ const ConsumerDashboard = () => {
       <p>Email: {profile.email}</p>
       <p>Phone: {consumerProfile.phone}</p>
       <p>Address: {consumerProfile.address}</p>
+      <button onClick={handleLogout}>
+        Logout
+      </button>
     </div>
   );
 };
+
+
 
 export default ConsumerDashboard;

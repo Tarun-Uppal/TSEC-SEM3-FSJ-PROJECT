@@ -1,10 +1,23 @@
 import React, { useEffect, useState } from "react";
 import {
   getCompanyProfile,
-  getUserProfile,
+  getUserProfile, logoutUser
 } from "../services/authService";
 
+import { useNavigate } from "react-router";
+
+
 const CompanyDashboard = () => {
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await logoutUser();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const [profile, setProfile] = useState(null);
   const [company, setCompany] = useState(null);
 
@@ -32,8 +45,14 @@ const CompanyDashboard = () => {
       <p>Email: {profile.email}</p>
       <p>Company Name: {company.company_name}</p>
       <p>Company Address: {company.address}</p>
+
+      <button onClick={handleLogout}>
+        Logout
+      </button>
     </div >
   )
 }
+
+
 
 export default CompanyDashboard

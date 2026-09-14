@@ -4,7 +4,6 @@ import { supabase } from "../lib/supabaseClient";
 // ==========================================
 // SIGN UP
 // ==========================================
-
 export async function signUpUser({
   email,
   password,
@@ -18,11 +17,9 @@ export async function signUpUser({
   // ------------------------------------------
   // 1. Create Supabase Auth user
   // ------------------------------------------
-
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
-
     options: {
       data: {
         full_name: fullName,
@@ -30,13 +27,10 @@ export async function signUpUser({
       },
     },
   });
-
   if (error) {
     throw error;
   }
-
   const user = data.user;
-
   if (!user) {
     throw new Error("User was not created");
   }
@@ -45,7 +39,6 @@ export async function signUpUser({
   // ------------------------------------------
   // 2. Create common profile
   // ------------------------------------------
-
   const { error: profileError } = await supabase
     .from("profiles")
     .insert({
@@ -54,7 +47,6 @@ export async function signUpUser({
       email: email,
       user_type: userType,
     });
-
   if (profileError) {
     console.error("Profile creation error:", profileError);
     throw profileError;
@@ -64,9 +56,7 @@ export async function signUpUser({
   // ------------------------------------------
   // 3. Create consumer information
   // ------------------------------------------
-
   if (userType === "consumer") {
-
     const { error: consumerError } = await supabase
       .from("consumers")
       .insert({
@@ -74,7 +64,6 @@ export async function signUpUser({
         phone: phone,
         address: address,
       });
-
     if (consumerError) {
       console.error("Consumer creation error:", consumerError);
       throw consumerError;
@@ -85,9 +74,7 @@ export async function signUpUser({
   // ------------------------------------------
   // 4. Create company information
   // ------------------------------------------
-
   if (userType === "company") {
-
     const { error: companyError } = await supabase
       .from("companies")
       .insert({
@@ -97,18 +84,11 @@ export async function signUpUser({
         phone: phone,
         address: address,
       });
-
     if (companyError) {
       console.error("Company creation error:", companyError);
       throw companyError;
     }
   }
-
-
-  // ------------------------------------------
-  // 5. Return created user
-  // ------------------------------------------
-
   return user;
 }
 
@@ -116,20 +96,16 @@ export async function signUpUser({
 // ==========================================
 // LOGIN
 // ==========================================
-
 export async function loginUser({ email, password }) {
-
   const { data, error } =
     await supabase.auth.signInWithPassword({
       email,
       password,
     });
-
   if (error) {
     console.error("Supabase login error:", error);
     throw error;
   }
-
   return data.user;
 }
 
@@ -137,22 +113,16 @@ export async function loginUser({ email, password }) {
 // ==========================================
 // GET CURRENT AUTH USER
 // ==========================================
-
 export async function getCurrentUser() {
-
   const {
     data: { user },
     error,
   } = await supabase.auth.getUser();
-
   if (error) {
     throw error;
-  }
-
-  if (!user) {
+  }  if (!user) {
     throw new Error("No logged-in user found");
   }
-
   return user;
 }
 
@@ -160,22 +130,17 @@ export async function getCurrentUser() {
 // ==========================================
 // GET COMMON USER PROFILE
 // ==========================================
-
 export async function getUserProfile() {
-
   const user = await getCurrentUser();
-
   const { data: profile, error } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .single();
-
   if (error) {
     console.error("Profile fetch error:", error);
     throw error;
   }
-
   return profile;
 }
 
@@ -183,22 +148,17 @@ export async function getUserProfile() {
 // ==========================================
 // GET CONSUMER INFORMATION
 // ==========================================
-
 export async function getConsumerProfile() {
-
   const user = await getCurrentUser();
-
   const { data: consumer, error } = await supabase
     .from("consumers")
     .select("*")
     .eq("user_id", user.id)
     .single();
-
   if (error) {
     console.error("Consumer fetch error:", error);
     throw error;
   }
-
   return consumer;
 }
 
@@ -206,22 +166,17 @@ export async function getConsumerProfile() {
 // ==========================================
 // GET COMPANY INFORMATION
 // ==========================================
-
 export async function getCompanyProfile() {
-
   const user = await getCurrentUser();
-
   const { data: company, error } = await supabase
     .from("companies")
     .select("*")
     .eq("user_id", user.id)
     .single();
-
   if (error) {
     console.error("Company fetch error:", error);
     throw error;
   }
-
   return company;
 }
 
@@ -231,9 +186,9 @@ export async function getCompanyProfile() {
 // ==========================================
 
 export async function logoutUser() {
-
+  console.log("Logging out user...");
   const { error } = await supabase.auth.signOut();
-
+  console.log("User logged out.");
   if (error) {
     throw error;
   }
