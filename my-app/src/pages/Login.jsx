@@ -34,7 +34,7 @@ function Login() {
       console.log("Logged in user:", user);
 
       alert("Login successful!");
-      const profile = await getUserProfile();
+      const profile = await getUserProfile(user.id);
       console.log("User profile:", profile);
 
 

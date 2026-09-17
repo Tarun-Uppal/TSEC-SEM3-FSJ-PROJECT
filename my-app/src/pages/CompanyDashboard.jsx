@@ -1,15 +1,55 @@
 import React, { useEffect, useState } from "react";
-import {
-  getCompanyProfile,
-  getUserProfile, logoutUser, getCompanyClaims,
-} from "../services/authService";
-
 import { useNavigate } from "react-router";
 
+import { useAuth } from "../context/AuthContext";
+import {
+  getCompanyProfile,
+  getCompanyClaims,
+  logoutUser,
+} from "../services/authService";
 
 const CompanyDashboard = () => {
-
   const navigate = useNavigate();
+
+  // Get logged-in user and common profile from AuthContext
+  const { user, profile } = useAuth();
+
+  const [company, setCompany] = useState(null);
+  const [claims, setClaims] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  // ============================================
+  // LOAD COMPANY DATA
+  // ============================================
+
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const loadCompanyData = async () => {
+      try {
+        setLoading(true);
+
+        // Get company profile and claims
+        const companyProfile = await getCompanyProfile(user.id);
+
+        const companyClaims = await getCompanyClaims(user.id);
+
+        setCompany(companyProfile);
+        setClaims(companyClaims);
+      } catch (error) {
+        console.error("Error loading company data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadCompanyData();
+  }, [user?.id]);
+
+  // ============================================
+  // LOGOUT
+  // ============================================
+
   const handleLogout = async () => {
     try {
       await logoutUser();
@@ -19,52 +59,61 @@ const CompanyDashboard = () => {
     }
   };
 
-  const [profile, setProfile] = useState(null);
-  const [company, setCompany] = useState(null);
-  const [claims, setClaims] = useState(null);
+  // ============================================
+  // LOADING
+  // ============================================
 
-  useEffect(() => {
-    async function loadUserData() {
-      try {
-        const userProfile = await getUserProfile();
-        const companyProfile = await getCompanyProfile();
-        const companyClaims = await getCompanyClaims(companyProfile.user_id);
-
-        setProfile(userProfile);
-        setCompany(companyProfile);
-        setClaims(companyClaims);
-
-      } catch (error) {
-        console.error("Error loading user:", error);
-      }
-    }
-    loadUserData();
-  }, []);
-
-  if (!profile || !company) {
+  if (loading || !profile || !company) {
     return <div>Loading...</div>;
   }
+
+  // ============================================
+  // DASHBOARD
+  // ============================================
+
   return (
     <div>
       <h1>Welcome, {profile.full_name}</h1>
+
       <p>Email: {profile.email}</p>
+
       <p>Company Name: {company.company_name}</p>
+
       <p>Company Address: {company.address}</p>
-      {claims && claims.map((claim) => (
-        <div key={claim.id}>
-          <h2>Claim ID: {claim.claim_number}</h2>
-          <p>Status: {claim.status}</p>
-          <p>Consumer Name: {claim.profiles?.full_name}</p>
-          <p>Consumer Email: {claim.profiles?.email}</p>
-        </div>
-      ))}
+
+      <h2>Warranty Claims</h2>
+
+      {claims.length === 0 ? (
+        <p>No warranty claims found.</p>
+      ) : (
+        claims.map((claim) => (
+          <div key={claim.id}>
+            <h3>Claim ID: {claim.claim_number}</h3>
+
+            <p>
+              <strong>Status:</strong> {claim.status}
+            </p>
+
+            <p>
+              <strong>Consumer Name:</strong>{" "}
+              {claim.profiles?.full_name || "Unknown"}
+            </p>
+
+            <p>
+              <strong>Consumer Email:</strong>{" "}
+              {claim.profiles?.email || "Unknown"}
+            </p>
+
+            <hr />
+          </div>
+        ))
+      )}
+
       <button onClick={handleLogout}>
         Logout
       </button>
-    </div >
-  )
-}
+    </div>
+  );
+};
 
-
-
-export default CompanyDashboard
+export default CompanyDashboard;

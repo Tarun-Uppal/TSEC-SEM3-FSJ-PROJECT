@@ -1,6 +1,5 @@
 import { supabase } from "../lib/supabaseClient";
 
-
 // ============================================
 // SIGN UP
 // ============================================
@@ -41,7 +40,7 @@ export async function signUpUser({
     .insert({
       id: user.id,
       full_name: fullName,
-      email: email,
+      email,
       user_type: userType,
     });
 
@@ -56,8 +55,8 @@ export async function signUpUser({
       .from("consumers")
       .insert({
         user_id: user.id,
-        phone: phone,
-        address: address,
+        phone: phone || null,
+        address: address || null,
       });
 
     if (consumerError) {
@@ -72,10 +71,10 @@ export async function signUpUser({
       .from("companies")
       .insert({
         user_id: user.id,
-        company_name: companyName,
+        company_name: companyName || null,
         contact_name: fullName,
-        phone: phone,
-        address: address,
+        phone: phone || null,
+        address: address || null,
       });
 
     if (companyError) {
@@ -111,15 +110,29 @@ export async function loginUser({ email, password }) {
 // GET CURRENT AUTH USER
 // ============================================
 
+/*
+  IMPORTANT:
+
+  This uses the locally stored Supabase session.
+
+  Do NOT use this repeatedly throughout the app.
+  Your AuthContext should normally provide the user.
+
+  This function is still useful for places where
+  you genuinely need to retrieve the current session.
+*/
+
 export async function getCurrentUser() {
   const {
-    data: { user },
+    data: { session },
     error,
-  } = await supabase.auth.getUser();
+  } = await supabase.auth.getSession();
 
   if (error) {
     throw error;
   }
+
+  const user = session?.user;
 
   if (!user) {
     throw new Error("No logged-in user found");
@@ -133,13 +146,15 @@ export async function getCurrentUser() {
 // GET COMMON USER PROFILE
 // ============================================
 
-export async function getUserProfile() {
-  const user = await getCurrentUser();
+export async function getUserProfile(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
 
   const { data: profile, error } = await supabase
     .from("profiles")
-    .select("*")
-    .eq("id", user.id)
+    .select("id, full_name, email, user_type")
+    .eq("id", userId)
     .single();
 
   if (error) {
@@ -155,13 +170,15 @@ export async function getUserProfile() {
 // GET CONSUMER INFORMATION
 // ============================================
 
-export async function getConsumerProfile() {
-  const user = await getCurrentUser();
+export async function getConsumerProfile(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
 
   const { data: consumer, error } = await supabase
     .from("consumers")
-    .select("*")
-    .eq("user_id", user.id)
+    .select("user_id, phone, address")
+    .eq("user_id", userId)
     .single();
 
   if (error) {
@@ -177,13 +194,17 @@ export async function getConsumerProfile() {
 // GET COMPANY INFORMATION
 // ============================================
 
-export async function getCompanyProfile() {
-  const user = await getCurrentUser();
+export async function getCompanyProfile(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
 
   const { data: company, error } = await supabase
     .from("companies")
-    .select("*")
-    .eq("user_id", user.id)
+    .select(
+      "user_id, company_name, contact_name, phone, address"
+    )
+    .eq("user_id", userId)
     .single();
 
   if (error) {
@@ -209,11 +230,14 @@ export async function getCompanies() {
     console.error("Companies fetch error:", error);
     throw error;
   }
+
   return companies;
 }
 
-export async function getUserClaims() {
-  const user = await getCurrentUser();
+export async function getUserClaims(userId) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
 
   const { data: claims, error } = await supabase
     .from("warranty_claims")
@@ -223,7 +247,7 @@ export async function getUserClaims() {
         company_name
       )
     `)
-    .eq("user_id", user.id)
+    .eq("user_id", userId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -234,8 +258,15 @@ export async function getUserClaims() {
   return claims;
 }
 
-export async function getCompanyClaims() {
-  const companyProfile = await getCompanyProfile();
+
+// ============================================
+// GET COMPANY CLAIMS
+// ============================================
+
+export async function getCompanyClaims(companyId) {
+  if (!companyId) {
+    throw new Error("Company ID is required");
+  }
 
   const { data: claims, error } = await supabase
     .from("warranty_claims")
@@ -246,7 +277,7 @@ export async function getCompanyClaims() {
         email
       )
     `)
-    .eq("company_id", companyProfile.user_id)
+    .eq("company_id", companyId)
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -254,16 +285,16 @@ export async function getCompanyClaims() {
     throw error;
   }
 
-  console.log("Company claims:", claims);
-
   return claims;
 }
+
 
 // ============================================
 // CREATE WARRANTY CLAIM
 // ============================================
 
 export async function createClaim({
+  userId,
   companyId,
   productName,
   expiryDate,
@@ -271,31 +302,27 @@ export async function createClaim({
   purchaseDate,
   issueDetails,
 }) {
-  // Get currently logged-in consumer
-  const user = await getCurrentUser();
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
 
-  // Generate unique claim number
+  if (!companyId) {
+    throw new Error("Company ID is required");
+  }
+
   const claimNumber = `CLM-${Date.now()}`;
 
   const { data, error } = await supabase
     .from("warranty_claims")
     .insert({
       claim_number: claimNumber,
-
-      // Logged-in consumer
-      user_id: user.id,
-
-      // Selected company
+      user_id: userId,
       company_id: companyId,
-
       product_name: productName,
       expiry_date: expiryDate,
       serial_number: serialNumber || null,
       purchase_date: purchaseDate || null,
       issue_details: issueDetails,
-
-      // Database also has a default for this,
-      // but explicitly setting it is fine.
       status: "submitted",
     })
     .select()
