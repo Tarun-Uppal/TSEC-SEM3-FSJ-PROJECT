@@ -91,6 +91,16 @@ const CompanyDashboard = () => {
             <h3>Claim ID: {claim.claim_number}</h3>
 
             <p>
+              <strong>Product:</strong>{" "}
+              {claim.product_name || "Unknown"}
+            </p>
+
+            <p>
+              <strong>Problem Description:</strong>{" "}
+              {claim.issue_details || "No description provided"}
+            </p>
+
+            <p>
               <strong>Status:</strong> {claim.status}
             </p>
 
