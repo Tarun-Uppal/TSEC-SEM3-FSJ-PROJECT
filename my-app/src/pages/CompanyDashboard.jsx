@@ -5,8 +5,11 @@ import { useAuth } from "../context/AuthContext";
 import {
   getCompanyProfile,
   getCompanyClaims,
+  updateClaimStatus,
   logoutUser,
 } from "../services/authService";
+
+const STATUS_OPTIONS = ["submitted", "received", "resolved"];
 
 const CompanyDashboard = () => {
   const navigate = useNavigate();
@@ -16,6 +19,7 @@ const CompanyDashboard = () => {
   const [company, setCompany] = useState(null);
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [updatingClaimId, setUpdatingClaimId] = useState(null);
 
   // ============================================
   // LOAD COMPANY DATA
@@ -42,6 +46,35 @@ const CompanyDashboard = () => {
 
     loadCompanyData();
   }, [user?.id]);
+
+  // ============================================
+  // UPDATE CLAIM STATUS
+  // ============================================
+
+  const handleStatusChange = async (claimId, newStatus) => {
+    try {
+      setUpdatingClaimId(claimId);
+
+      await updateClaimStatus(claimId, newStatus);
+
+      // Update the claim locally so the UI changes immediately
+      setClaims((currentClaims) =>
+        currentClaims.map((claim) =>
+          claim.id === claimId
+            ? {
+                ...claim,
+                status: newStatus,
+              }
+            : claim
+        )
+      );
+    } catch (error) {
+      console.error("Error updating claim status:", error);
+      alert("Unable to update claim status. Please try again.");
+    } finally {
+      setUpdatingClaimId(null);
+    }
+  };
 
   // ============================================
   // LOGOUT
@@ -80,19 +113,16 @@ const CompanyDashboard = () => {
 
   const totalClaims = claims.length;
 
-  const pendingClaims = claims.filter(
-    (claim) =>
-      claim.status?.toLowerCase() === "pending"
+  const submittedClaims = claims.filter(
+    (claim) => claim.status?.toLowerCase() === "submitted"
   ).length;
 
-  const approvedClaims = claims.filter(
-    (claim) =>
-      claim.status?.toLowerCase() === "approved"
+  const receivedClaims = claims.filter(
+    (claim) => claim.status?.toLowerCase() === "received"
   ).length;
 
   const resolvedClaims = claims.filter(
-    (claim) =>
-      claim.status?.toLowerCase() === "resolved"
+    (claim) => claim.status?.toLowerCase() === "resolved"
   ).length;
 
   // ============================================
@@ -101,17 +131,14 @@ const CompanyDashboard = () => {
 
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
-      case "approved":
+      case "submitted":
+        return "bg-amber-50 text-amber-700 border-amber-200";
+
+      case "received":
         return "bg-blue-50 text-blue-700 border-blue-200";
 
       case "resolved":
         return "bg-emerald-50 text-emerald-700 border-emerald-200";
-
-      case "rejected":
-        return "bg-red-50 text-red-700 border-red-200";
-
-      case "pending":
-        return "bg-amber-50 text-amber-700 border-amber-200";
 
       default:
         return "bg-slate-50 text-slate-600 border-slate-200";
@@ -272,7 +299,7 @@ const CompanyDashboard = () => {
 
           </div>
 
-          {/* PENDING */}
+          {/* SUBMITTED */}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
@@ -280,11 +307,11 @@ const CompanyDashboard = () => {
 
               <div>
                 <p className="text-sm font-medium text-slate-500">
-                  Pending
+                  Submitted
                 </p>
 
                 <p className="mt-2 text-3xl font-bold text-slate-900">
-                  {pendingClaims}
+                  {submittedClaims}
                 </p>
               </div>
 
@@ -296,7 +323,7 @@ const CompanyDashboard = () => {
 
           </div>
 
-          {/* APPROVED */}
+          {/* RECEIVED */}
 
           <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
 
@@ -304,11 +331,11 @@ const CompanyDashboard = () => {
 
               <div>
                 <p className="text-sm font-medium text-slate-500">
-                  Approved
+                  Received
                 </p>
 
                 <p className="mt-2 text-3xl font-bold text-slate-900">
-                  {approvedClaims}
+                  {receivedClaims}
                 </p>
               </div>
 
@@ -364,7 +391,7 @@ const CompanyDashboard = () => {
                 </h3>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Review warranty claims submitted by consumers.
+                  Review claims and update their current status.
                 </p>
               </div>
 
@@ -423,12 +450,14 @@ const CompanyDashboard = () => {
                           {claim.claim_number}
                         </h4>
 
+                        {/* STATUS BADGE */}
+
                         <span
                           className={`rounded-full border px-2.5 py-1 text-xs font-semibold capitalize ${getStatusStyle(
                             claim.status
                           )}`}
                         >
-                          {claim.status || "Unknown"}
+                          {claim.status || "Submitted"}
                         </span>
 
                       </div>
@@ -436,6 +465,47 @@ const CompanyDashboard = () => {
                       <p className="mt-2 text-sm font-medium text-slate-700">
                         {claim.product_name || "Unknown Product"}
                       </p>
+
+                    </div>
+
+                    {/* =================================
+                        STATUS EDITOR
+                    ================================= */}
+
+                    <div className="flex items-center gap-3">
+
+                      <label
+                        htmlFor={`status-${claim.id}`}
+                        className="text-sm font-medium text-slate-500"
+                      >
+                        Update Status
+                      </label>
+
+                      <select
+                        id={`status-${claim.id}`}
+                        value={
+                          claim.status?.toLowerCase() || "submitted"
+                        }
+                        disabled={updatingClaimId === claim.id}
+                        onChange={(event) =>
+                          handleStatusChange(
+                            claim.id,
+                            event.target.value
+                          )
+                        }
+                        className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-slate-700 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10 disabled:cursor-not-allowed disabled:bg-slate-100"
+                      >
+                        {STATUS_OPTIONS.map((status) => (
+                          <option key={status} value={status}>
+                            {status.charAt(0).toUpperCase() +
+                              status.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+
+                      {updatingClaimId === claim.id && (
+                        <div className="h-5 w-5 animate-spin rounded-full border-2 border-slate-200 border-t-[#003C37]" />
+                      )}
 
                     </div>
 
@@ -527,6 +597,7 @@ const CompanyDashboard = () => {
         </div>
 
       </main>
+
     </div>
   );
 };

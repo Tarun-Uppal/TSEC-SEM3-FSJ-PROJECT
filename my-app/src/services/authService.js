@@ -348,3 +348,42 @@ export async function logoutUser() {
     throw error;
   }
 }
+
+// ============================================
+// UPDATE WARRANTY CLAIM STATUS
+// ============================================
+
+export async function updateClaimStatus(claimId, status) {
+  if (!claimId) {
+    throw new Error("Claim ID is required");
+  }
+
+  const allowedStatuses = ["submitted", "received", "resolved"];
+
+  if (!allowedStatuses.includes(status)) {
+    throw new Error(
+      `Invalid claim status. Allowed statuses: ${allowedStatuses.join(", ")}`
+    );
+  }
+
+  const { data, error } = await supabase
+    .from("warranty_claims")
+    .update({
+      status: status,
+    })
+    .eq("id", claimId)
+    .select("*");
+
+  if (error) {
+    console.error("Claim status update error:", error);
+    throw error;
+  }
+
+  if (!data || data.length === 0) {
+    throw new Error(
+      "Claim was not updated. Check the claim ID and Supabase RLS policies."
+    );
+  }
+
+  return data[0];
+}
