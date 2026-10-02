@@ -12,27 +12,10 @@ import {
 const ClaimForm = () => {
   const navigate = useNavigate();
 
-  // ============================================
-  // AUTH DATA
-  // ============================================
-
   const { user, profile, loading: authLoading } = useAuth();
 
-  // ============================================
-  // CONSUMER DATA
-  // ============================================
-
   const [consumerProfile, setConsumerProfile] = useState(null);
-
-  // ============================================
-  // COMPANIES
-  // ============================================
-
   const [companies, setCompanies] = useState([]);
-
-  // ============================================
-  // FORM DATA
-  // ============================================
 
   const [formData, setFormData] = useState({
     companyId: "",
@@ -42,10 +25,6 @@ const ClaimForm = () => {
     purchaseDate: "",
     issueDetails: "",
   });
-
-  // ============================================
-  // UI STATES
-  // ============================================
 
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -171,214 +150,250 @@ const ClaimForm = () => {
   };
 
   // ============================================
-  // LOADING SCREEN
+  // LOADING
   // ============================================
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-[#003C37]" />
-          <p className="text-sm font-medium text-slate-500">
-            Loading claim form...
+      <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center px-6">
+        <div className="flex flex-col items-center">
+          <div className="relative h-9 w-9">
+            <div className="absolute inset-0 rounded-full border-[3px] border-[#d9dfdc]" />
+            <div className="absolute inset-0 animate-spin rounded-full border-[3px] border-transparent border-t-[#173f3a]" />
+          </div>
+
+          <p className="mt-5 text-[13px] font-medium tracking-[-0.01em] text-[#7a817e]">
+            Loading your claim form
           </p>
         </div>
       </div>
     );
   }
 
-  // ============================================
-  // PAGE
-  // ============================================
-
   return (
-    <div className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-
+    <div className="min-h-screen bg-[#f7f7f5] px-4 py-8 text-[#1d2421] sm:px-6 sm:py-12 lg:px-8">
       <div className="mx-auto max-w-4xl">
 
         {/* =====================================
             HEADER
         ====================================== */}
 
-        <div className="mb-8">
+        <header className="mb-9">
           <button
             type="button"
             onClick={() => navigate("/consumer/dashboard")}
-            className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-[#003C37]"
+            className="group mb-7 inline-flex items-center gap-2 text-[13px] font-medium text-[#737b77] transition-colors duration-200 hover:text-[#173f3a]"
           >
-            <span>←</span>
+            <span className="text-base transition-transform duration-200 group-hover:-translate-x-0.5">
+              ←
+            </span>
+
             Back to Dashboard
           </button>
 
-          <div>
-            <p className="mb-2 text-sm font-semibold uppercase tracking-wider text-[#003C37]">
-              Consumer Portal
-            </p>
+          <div className="max-w-2xl">
+            <div className="mb-3 flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-[#1f6258]" />
 
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-[#356b62]">
+                Consumer Portal
+              </p>
+            </div>
+
+            <h1 className="text-[34px] font-semibold tracking-[-0.04em] text-[#18201d] sm:text-[42px] sm:leading-[1.08]">
               Warranty Claim
             </h1>
 
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
-              Submit a warranty claim for your product. Provide the details
-              below so the company can review and process your claim.
+            <p className="mt-3 max-w-xl text-[15px] leading-7 tracking-[-0.01em] text-[#737b77] sm:text-base">
+              Submit a warranty claim and provide the information needed to
+              help the company review your request.
             </p>
           </div>
-        </div>
+        </header>
 
         {/* =====================================
             MAIN CARD
         ====================================== */}
 
-        <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <main className="overflow-hidden rounded-[26px] border border-[#e3e6e3] bg-white shadow-[0_18px_55px_rgba(24,39,34,0.06)]">
 
-          {/* =====================================
-              CARD HEADER
-          ====================================== */}
+          {/* CARD HEADER */}
 
-          <div className="border-b border-slate-200 bg-white px-6 py-5 sm:px-8">
-            <h2 className="text-lg font-semibold text-slate-900">
-              Submit a New Claim
-            </h2>
+          <div className="border-b border-[#eceeec] bg-[#fcfcfb] px-6 py-6 sm:px-9">
+            <div className="flex items-start justify-between gap-6">
+              <div>
+                <h2 className="text-[17px] font-semibold tracking-[-0.02em] text-[#202824]">
+                  Submit a New Claim
+                </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Enter the product and warranty information below.
-            </p>
+                <p className="mt-1.5 text-[13px] leading-5 text-[#858c88]">
+                  Enter the product and warranty information below.
+                </p>
+              </div>
+
+              <div className="hidden h-9 w-9 shrink-0 items-center justify-center rounded-full bg-[#edf4f1] text-[#285d54] sm:flex">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="h-4 w-4"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75"
+                  />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M7.5 3.75h9A1.5 1.5 0 0 1 18 5.25v13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 6 18.75V5.25a1.5 1.5 0 0 1 1.5-1.5Z"
+                  />
+                </svg>
+              </div>
+            </div>
           </div>
 
-          <div className="px-6 py-6 sm:px-8 sm:py-8">
+          <div className="px-6 py-7 sm:px-9 sm:py-9">
 
             {/* =====================================
                 USER INFORMATION
             ====================================== */}
 
-            <section className="mb-8">
+            <section className="mb-9">
+              <div className="mb-5">
+                <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#4d766e]">
+                  Account
+                </p>
 
-              <div className="mb-4">
-                <h3 className="text-base font-semibold text-slate-900">
+                <h3 className="text-[17px] font-semibold tracking-[-0.025em] text-[#202824]">
                   Your Information
                 </h3>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-[13px] text-[#858c88]">
                   This information is associated with your account.
                 </p>
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
 
-                {/* NAME */}
+                {/* INFO ITEM */}
 
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Full Name
-                  </p>
+                {[
+                  {
+                    label: "Full Name",
+                    value: profile?.full_name,
+                  },
+                  {
+                    label: "Email",
+                    value: profile?.email,
+                  },
+                  {
+                    label: "Phone",
+                    value: consumerProfile?.phone,
+                  },
+                  {
+                    label: "Address",
+                    value: consumerProfile?.address,
+                  },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="rounded-2xl border border-[#e8ebe9] bg-[#fafbf9] px-4 py-3.5 transition-colors duration-200 hover:bg-[#f7f9f7]"
+                  >
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.13em] text-[#9aa19e]">
+                      {item.label}
+                    </p>
 
-                  <p className="mt-1 text-sm font-semibold text-slate-800">
-                    {profile?.full_name || "Not available"}
-                  </p>
-                </div>
-
-                {/* EMAIL */}
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Email
-                  </p>
-
-                  <p className="mt-1 break-all text-sm font-semibold text-slate-800">
-                    {profile?.email || "Not available"}
-                  </p>
-                </div>
-
-                {/* PHONE */}
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Phone
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-800">
-                    {consumerProfile?.phone || "Not available"}
-                  </p>
-                </div>
-
-                {/* ADDRESS */}
-
-                <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                    Address
-                  </p>
-
-                  <p className="mt-1 text-sm font-semibold text-slate-800">
-                    {consumerProfile?.address || "Not available"}
-                  </p>
-                </div>
-
+                    <p className="mt-1.5 break-words text-[13px] font-medium leading-5 text-[#303934]">
+                      {item.value || "Not available"}
+                    </p>
+                  </div>
+                ))}
               </div>
             </section>
 
             {/* =====================================
-                SUCCESS MESSAGE
+                SUCCESS
             ====================================== */}
 
             {success && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
-                  ✓
-                </div>
+              <div className="mb-7 rounded-2xl border border-[#d5e8df] bg-[#f4faf7] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#dcefe7] text-[#28705c]">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="h-4 w-4"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="m5 12 4 4L19 6"
+                      />
+                    </svg>
+                  </div>
 
-                <div>
-                  <p className="text-sm font-semibold text-emerald-900">
-                    Claim submitted
-                  </p>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#245846]">
+                      Claim submitted
+                    </p>
 
-                  <p className="mt-1 text-sm leading-5 text-emerald-700">
-                    {success}
-                  </p>
+                    <p className="mt-1 text-[13px] leading-5 text-[#4c7768]">
+                      {success}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* =====================================
-                ERROR MESSAGE
+                ERROR
             ====================================== */}
 
             {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-                <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-sm font-bold text-red-700">
-                  !
-                </div>
+              <div className="mb-7 rounded-2xl border border-[#f0d8d5] bg-[#fff8f7] p-4">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#f8e5e2] text-[#b34e45]">
+                    <span className="text-sm font-semibold">!</span>
+                  </div>
 
-                <div>
-                  <p className="text-sm font-semibold text-red-900">
-                    Unable to submit claim
-                  </p>
+                  <div>
+                    <p className="text-[13px] font-semibold text-[#8f3f38]">
+                      Unable to submit claim
+                    </p>
 
-                  <p className="mt-1 text-sm leading-5 text-red-700">
-                    {error}
-                  </p>
+                    <p className="mt-1 text-[13px] leading-5 text-[#ad5c54]">
+                      {error}
+                    </p>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* =====================================
-                CLAIM FORM
+                FORM
             ====================================== */}
 
-            <form onSubmit={handleSubmit} className="space-y-7">
+            <form onSubmit={handleSubmit} className="space-y-9">
 
               {/* =====================================
                   PRODUCT INFORMATION
               ====================================== */}
 
               <section>
-
                 <div className="mb-5">
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#4d766e]">
+                    Step 01
+                  </p>
+
+                  <h3 className="text-[17px] font-semibold tracking-[-0.025em] text-[#202824]">
                     Product Information
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[13px] text-[#858c88]">
                     Tell us about the product covered by the warranty.
                   </p>
                 </div>
@@ -390,9 +405,10 @@ const ClaimForm = () => {
                   <div className="sm:col-span-2">
                     <label
                       htmlFor="companyId"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="mb-2 block text-[13px] font-medium text-[#39423e]"
                     >
-                      Company <span className="text-red-500">*</span>
+                      Company{" "}
+                      <span className="text-[#b4584e]">*</span>
                     </label>
 
                     <select
@@ -401,11 +417,9 @@ const ClaimForm = () => {
                       value={formData.companyId}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                      className="h-[50px] w-full appearance-none rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 text-[14px] text-[#29322e] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                     >
-                      <option value="">
-                        Select a company
-                      </option>
+                      <option value="">Select a company</option>
 
                       {companies.map((company) => (
                         <option
@@ -423,9 +437,10 @@ const ClaimForm = () => {
                   <div>
                     <label
                       htmlFor="productName"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="mb-2 block text-[13px] font-medium text-[#39423e]"
                     >
-                      Product Name <span className="text-red-500">*</span>
+                      Product Name{" "}
+                      <span className="text-[#b4584e]">*</span>
                     </label>
 
                     <input
@@ -436,7 +451,7 @@ const ClaimForm = () => {
                       onChange={handleChange}
                       placeholder="e.g. Washing Machine"
                       required
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                      className="h-[50px] w-full rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 text-[14px] text-[#29322e] placeholder:text-[#a4aaa7] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                     />
                   </div>
 
@@ -445,7 +460,7 @@ const ClaimForm = () => {
                   <div>
                     <label
                       htmlFor="serialNumber"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="mb-2 block text-[13px] font-medium text-[#39423e]"
                     >
                       Serial Number
                     </label>
@@ -457,10 +472,9 @@ const ClaimForm = () => {
                       value={formData.serialNumber}
                       onChange={handleChange}
                       placeholder="Enter serial number"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                      className="h-[50px] w-full rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 text-[14px] text-[#29322e] placeholder:text-[#a4aaa7] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                     />
                   </div>
-
                 </div>
               </section>
 
@@ -468,14 +482,17 @@ const ClaimForm = () => {
                   WARRANTY INFORMATION
               ====================================== */}
 
-              <section className="border-t border-slate-200 pt-7">
-
+              <section className="border-t border-[#eceeec] pt-8">
                 <div className="mb-5">
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#4d766e]">
+                    Step 02
+                  </p>
+
+                  <h3 className="text-[17px] font-semibold tracking-[-0.025em] text-[#202824]">
                     Warranty Information
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[13px] text-[#858c88]">
                     Provide the relevant purchase and warranty dates.
                   </p>
                 </div>
@@ -487,7 +504,7 @@ const ClaimForm = () => {
                   <div>
                     <label
                       htmlFor="purchaseDate"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="mb-2 block text-[13px] font-medium text-[#39423e]"
                     >
                       Purchase Date
                     </label>
@@ -498,7 +515,7 @@ const ClaimForm = () => {
                       name="purchaseDate"
                       value={formData.purchaseDate}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                      className="h-[50px] w-full rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 text-[14px] text-[#29322e] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                     />
                   </div>
 
@@ -507,10 +524,10 @@ const ClaimForm = () => {
                   <div>
                     <label
                       htmlFor="expiryDate"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="mb-2 block text-[13px] font-medium text-[#39423e]"
                     >
                       Warranty Expiry Date{" "}
-                      <span className="text-red-500">*</span>
+                      <span className="text-[#b4584e]">*</span>
                     </label>
 
                     <input
@@ -520,10 +537,9 @@ const ClaimForm = () => {
                       value={formData.expiryDate}
                       onChange={handleChange}
                       required
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                      className="h-[50px] w-full rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 text-[14px] text-[#29322e] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                     />
                   </div>
-
                 </div>
               </section>
 
@@ -531,14 +547,17 @@ const ClaimForm = () => {
                   ISSUE DETAILS
               ====================================== */}
 
-              <section className="border-t border-slate-200 pt-7">
-
+              <section className="border-t border-[#eceeec] pt-8">
                 <div className="mb-5">
-                  <h3 className="text-base font-semibold text-slate-900">
+                  <p className="mb-1 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#4d766e]">
+                    Step 03
+                  </p>
+
+                  <h3 className="text-[17px] font-semibold tracking-[-0.025em] text-[#202824]">
                     Issue Details
                   </h3>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-[13px] text-[#858c88]">
                     Describe the problem you are experiencing with the
                     product.
                   </p>
@@ -547,10 +566,10 @@ const ClaimForm = () => {
                 <div>
                   <label
                     htmlFor="issueDetails"
-                    className="mb-2 block text-sm font-medium text-slate-700"
+                    className="mb-2 block text-[13px] font-medium text-[#39423e]"
                   >
                     Describe the Issue{" "}
-                    <span className="text-red-500">*</span>
+                    <span className="text-[#b4584e]">*</span>
                   </label>
 
                   <textarea
@@ -561,27 +580,26 @@ const ClaimForm = () => {
                     placeholder="Describe the issue with your product..."
                     rows="6"
                     required
-                    className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-800 placeholder:text-slate-400 outline-none transition focus:border-[#003C37] focus:ring-2 focus:ring-[#003C37]/10"
+                    className="w-full resize-none rounded-[14px] border border-[#dfe4e1] bg-[#fbfcfb] px-4 py-3.5 text-[14px] leading-6 text-[#29322e] placeholder:text-[#a4aaa7] outline-none transition-all duration-200 hover:border-[#c9d1cd] focus:border-[#32675e] focus:bg-white focus:ring-4 focus:ring-[#32675e]/[0.08]"
                   />
 
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="mt-2.5 text-[11px] leading-5 text-[#9aa19e]">
                     Please provide as much detail as possible to help the
                     company understand the problem.
                   </p>
                 </div>
-
               </section>
 
               {/* =====================================
                   ACTIONS
               ====================================== */}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-7 sm:flex-row sm:justify-end">
+              <div className="flex flex-col-reverse gap-3 border-t border-[#eceeec] pt-7 sm:flex-row sm:items-center sm:justify-end">
 
                 <button
                   type="button"
                   onClick={() => navigate("/consumer/dashboard")}
-                  className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-200"
+                  className="h-[48px] rounded-[14px] border border-[#dfe4e1] bg-white px-6 text-[13px] font-semibold text-[#4b5550] transition-all duration-200 hover:border-[#cbd2ce] hover:bg-[#fafbfa] focus:outline-none focus:ring-4 focus:ring-[#68736e]/10"
                 >
                   Cancel
                 </button>
@@ -589,33 +607,56 @@ const ClaimForm = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="rounded-xl bg-[#003C37] px-7 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#002f2b] focus:outline-none focus:ring-2 focus:ring-[#003C37]/20 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="group h-[48px] rounded-[14px] bg-[#173f3a] px-7 text-[13px] font-semibold text-white shadow-[0_6px_18px_rgba(23,63,58,0.16)] transition-all duration-200 hover:bg-[#123630] hover:shadow-[0_8px_24px_rgba(23,63,58,0.22)] focus:outline-none focus:ring-4 focus:ring-[#173f3a]/20 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none"
                 >
                   {submitting ? (
                     <span className="flex items-center justify-center gap-2">
-                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
                       Submitting...
                     </span>
                   ) : (
-                    "Submit Claim"
+                    <span className="flex items-center justify-center gap-2">
+                      Submit Claim
+                      <span className="text-white/60 transition-transform duration-200 group-hover:translate-x-0.5">
+                        →
+                      </span>
+                    </span>
                   )}
                 </button>
-
               </div>
-
             </form>
           </div>
-        </div>
+        </main>
 
         {/* =====================================
             FOOTER
         ====================================== */}
 
-        <p className="mt-6 text-center text-xs text-slate-400">
-          Your claim information will be securely shared with the selected
-          company for processing.
-        </p>
+        <div className="flex items-center justify-center gap-2 px-4 py-6">
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            className="h-3.5 w-3.5 text-[#9ba29f]"
+            stroke="currentColor"
+            strokeWidth="1.7"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 3.75 5.25 6.5v5.25c0 4.1 2.7 7.55 6.75 8.5 4.05-.95 6.75-4.4 6.75-8.5V6.5L12 3.75Z"
+            />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="m9.5 12 1.7 1.7 3.4-3.7"
+            />
+          </svg>
 
+          <p className="text-center text-[11px] text-[#969e9a]">
+            Your claim information is securely shared with the selected
+            company for processing.
+          </p>
+        </div>
       </div>
     </div>
   );

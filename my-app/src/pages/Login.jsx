@@ -1,13 +1,5 @@
 import { useState } from "react";
 import { Link } from "react-router";
-<<<<<<< Updated upstream
-import { loginUser, getUserProfile } from "../services/authService";
-import { useNavigate } from "react-router";
-
-
-function Login() {
-  const navigate = useNavigate();
-=======
 import {
   loginUser,
   sendEmailOtp,
@@ -26,7 +18,6 @@ function Login() {
   const [method, setMethod] = useState("password");
   const [codeSent, setCodeSent] = useState(false);
 
->>>>>>> Stashed changes
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -58,22 +49,6 @@ function Login() {
     try {
       setLoading(true);
 
-<<<<<<< Updated upstream
-      const user = await loginUser({ email: formData.email, password: formData.password, });
-
-      console.log("Logged in user:", user);
-
-      alert("Login successful!");
-      const profile = await getUserProfile(user.id);
-      console.log("User profile:", profile);
-
-
-      // We will redirect to the dashboard.
-      if (profile.user_type === "company") {
-        navigate("/company/dashboard");
-      } else if (profile.user_type === "consumer") {
-        navigate("/consumer/dashboard");
-=======
       if (method === "password") {
         await loginUser({
           email: formData.email,
@@ -87,68 +62,118 @@ function Login() {
           email: formData.email.trim(),
           token: formData.code.trim(),
         });
->>>>>>> Stashed changes
       }
-
     } catch (error) {
       console.error(error);
 
-      setError(error.message);
+      setError(
+        error?.message || "Unable to log in. Please check your credentials."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <h1>Welcome back</h1>
-        <p>Log in to your account</p>
+    <div className="min-h-screen bg-[#f7f7f5] text-[#1d2421]">
 
-        <form onSubmit={handleSubmit}>
+      {/* ========================================
+          HEADER
+      ======================================== */}
 
-          <div>
-            <label>Email</label>
+      <header className="border-b border-[#e4e7e4]/80 bg-[#f7f7f5]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-5 sm:px-6">
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
+          <div className="flex items-center gap-3">
+
+            {/* Logo */}
+            <div className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[#173f3a] shadow-[0_4px_12px_rgba(23,63,58,0.14)]">
+
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-4 w-4 text-white"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3.75 5.25 6.5v5.25c0 4.1 2.7 7.55 6.75 8.5 4.05-.95 6.75-4.4 6.75-8.5V6.5L12 3.75Z"
+                />
+
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m9.5 12 1.7 1.7 3.4-3.7"
+                />
+              </svg>
+
+            </div>
+
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#356b62]">
+                Resolv360
+              </p>
+
+              <p className="mt-0.5 text-[12px] font-medium tracking-[-0.01em] text-[#727a76]">
+                Warranty Management
+              </p>
+            </div>
+
           </div>
 
-          <div>
-            <label>Password</label>
+        </div>
+      </header>
 
-            <input
-              type="password"
-              name="password"
-              placeholder="Enter your password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
+      {/* ========================================
+          MAIN
+      ======================================== */}
 
-          {error && (
-            <p style={{ color: "red" }}>
-              {error}
+      <main className="flex min-h-[calc(100vh-74px)] items-center justify-center px-4 py-10 sm:px-6 sm:py-14">
+
+        <div className="w-full max-w-[430px]">
+
+          {/* ====================================
+              INTRO
+          ==================================== */}
+
+          <div className="mb-7 text-center">
+
+            <div className="mb-4 flex justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-[14px] bg-[#edf4f1] text-[#356b62]">
+
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  className="h-5 w-5"
+                  stroke="currentColor"
+                  strokeWidth="1.7"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M12 3.75 5.25 6.5v5.25c0 4.1 2.7 7.55 6.75 8.5 4.05-.95 6.75-4.4 6.75-8.5V6.5L12 3.75Z"
+                  />
+
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m9.5 12 1.7 1.7 3.4-3.7"
+                  />
+                </svg>
+
+              </div>
+            </div>
+
+            <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.17em] text-[#4d766e]">
+              Secure Portal
             </p>
-          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-          >
-            {loading ? "Logging in..." : "Log in"}
-          </button>
+            <h1 className="text-[32px] font-semibold tracking-[-0.045em] text-[#18201d] sm:text-[36px]">
+              Welcome back
+            </h1>
 
-<<<<<<< Updated upstream
-        </form>
-=======
             <p className="mt-2.5 text-[14px] leading-6 text-[#747c78]">
               Sign in to manage your warranty account.
             </p>
@@ -467,13 +492,7 @@ function Login() {
         </div>
 
       </footer>
->>>>>>> Stashed changes
 
-        <p>
-          Don't have an account?{" "}
-          <Link to="/signup">Sign up</Link>
-        </p>
-      </div>
     </div>
   );
 }

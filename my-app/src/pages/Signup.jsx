@@ -23,6 +23,7 @@ function Signup() {
 
   const handleChange = (e) => {
     setError("");
+
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
@@ -62,84 +63,63 @@ function Signup() {
         address: formData.address,
       });
 
-<<<<<<< Updated upstream
-      alert("Account created successfully!");
-
-      // Send user to login page
-      navigate("/login");
-=======
       // If "Confirm email" is on, the user must click the link first.
       // Otherwise they are logged in and PublicRoute redirects them.
       if (needsConfirmation) {
         setConfirmEmail(formData.email);
       }
->>>>>>> Stashed changes
 
     } catch (error) {
       console.error("SIGN UP ERROR:", error);
-      setError(error.message);
+
+      setError(
+        error?.message ||
+          "Unable to create your account. Please try again."
+      );
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
+    <div className="min-h-screen bg-[#f7f7f5] text-[#1d2421]">
 
-        <h1>Create an account</h1>
-        <p>Sign up to get started</p>
+      {/* ========================================
+          HEADER
+      ======================================== */}
 
-        <form onSubmit={handleSubmit}>
+      <header className="border-b border-[#e4e7e4]/80 bg-[#f7f7f5]/90 backdrop-blur-xl">
+        <div className="mx-auto flex max-w-7xl items-center justify-center px-4 py-5 sm:px-6">
 
-          {/* Full Name */}
-          <div>
-            <label>Full Name</label>
+          <div className="flex items-center gap-3">
 
-            <input
-              type="text"
-              name="fullName"
-              placeholder="Enter your name"
-              value={formData.fullName}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            {/* Logo */}
 
-          {/* Account Type */}
-          <div>
-            <label>Account Type</label>
+            <div className="flex h-9 w-9 items-center justify-center rounded-[11px] bg-[#173f3a] shadow-[0_4px_12px_rgba(23,63,58,0.14)]">
 
-            <select
-              name="userType"
-              value={formData.userType}
-              onChange={handleChange}
-              required
-            >
-              <option value="consumer">
-                Consumer
-              </option>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                className="h-4 w-4 text-white"
+                stroke="currentColor"
+                strokeWidth="1.8"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 3.75 5.25 6.5v5.25c0 4.1 2.7 7.55 6.75 8.5 4.05-.95 6.75-4.4 6.75-8.5V6.5L12 3.75Z"
+                />
 
-              <option value="company">
-                Company
-              </option>
-            </select>
-          </div>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="m9.5 12 1.7 1.7 3.4-3.7"
+                />
+              </svg>
 
-          {/* Company Name */}
-          {formData.userType === "company" && (
+            </div>
+
             <div>
-<<<<<<< Updated upstream
-              <label>Company Name</label>
-
-              <input
-                type="text"
-                name="companyName"
-                placeholder="Enter company name"
-                value={formData.companyName}
-                onChange={handleChange}
-                required
-=======
               <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#356b62]">
                 Resolv360
               </p>
@@ -610,107 +590,45 @@ function Signup() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 d="M12 3.75 5.5 6.4v5.1c0 4 2.6 7.35 6.5 8.25 3.9-.9 6.5-4.25 6.5-8.25V6.4L12 3.75Z"
->>>>>>> Stashed changes
               />
-            </div>
-          )}
 
-          {/* Email */}
-          <div>
-            <label>Email</label>
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m9.7 12 1.5 1.5 3.1-3.3"
+              />
+            </svg>
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label>Phone</label>
-
-            <input
-              type="tel"
-              name="phone"
-              placeholder="Enter your phone number"
-              value={formData.phone}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Address */}
-          <div>
-            <label>Address</label>
-
-            <textarea
-              name="address"
-              placeholder="Enter your address"
-              value={formData.address}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Password */}
-          <div>
-            <label>Password</label>
-
-            <input
-              type="password"
-              name="password"
-              placeholder="Create a password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Confirm Password */}
-          <div>
-            <label>Confirm Password</label>
-
-            <input
-              type="password"
-              name="confirmPassword"
-              placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-            />
-          </div>
-
-          {/* Error */}
-          {error && (
-            <p style={{ color: "red" }}>
-              {error}
+            <p className="text-[11px] text-[#969e9a]">
+              Your account information is securely protected.
             </p>
-          )}
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Creating account..."
-              : "Sign up"}
-          </button>
+          </div>
 
-        </form>
+        </div>
 
-        <p>
-          Already have an account?{" "}
-          <Link to="/login">
-            Log in
-          </Link>
-        </p>
+      </main>
 
-      </div>
+      {/* ========================================
+          FOOTER
+      ======================================== */}
+
+      <footer className="pb-7 text-center">
+
+        <div className="flex items-center justify-center gap-2">
+
+          <div className="h-1 w-1 rounded-full bg-[#a4aca8]" />
+
+          <p className="text-[11px] text-[#969e9a]">
+            Resolv360 Warranty Management Portal
+          </p>
+
+          <div className="h-1 w-1 rounded-full bg-[#a4aca8]" />
+
+        </div>
+
+      </footer>
+
     </div>
   );
 }
