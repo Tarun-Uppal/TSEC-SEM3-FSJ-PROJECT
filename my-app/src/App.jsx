@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from "react-router";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router";
 
 import Signup from "./pages/Signup";
 import Login from "./pages/Login";
@@ -65,6 +65,19 @@ function App() {
             <ProtectedRoute allowedType="consumer">
               <ClaimForm />
             </ProtectedRoute>
+          }
+        />
+
+        {/* Site root and unknown URLs.
+            Supabase may send users here after Google / email sign-in.
+            PublicRoute waits for the session, then redirects to the
+            dashboard; logged-out users go to the login page. */}
+        <Route
+          path="*"
+          element={
+            <PublicRoute>
+              <Navigate to="/login" replace />
+            </PublicRoute>
           }
         />
 
