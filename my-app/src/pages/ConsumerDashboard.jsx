@@ -16,6 +16,7 @@ const ConsumerDashboard = () => {
   const [consumerProfile, setConsumerProfile] = useState(null);
   const [claims, setClaims] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
 
   // ============================================
   // LOAD CONSUMER DATA
@@ -25,24 +26,44 @@ const ConsumerDashboard = () => {
     if (!user?.id) return;
 
     const loadDashboardData = async () => {
-      try {
-        setLoading(true);
+      // Load separately so one failure doesn't block the other
+      const [consumerResult, claimsResult] = await Promise.allSettled([
+        getConsumerProfile(user.id),
+        getUserClaims(user.id),
+      ]);
 
-        const [consumerData, claimsData] = await Promise.all([
-          getConsumerProfile(user.id),
-          getUserClaims(user.id),
-        ]);
-
-        setConsumerProfile(consumerData);
-        setClaims(claimsData);
-      } catch (error) {
-        console.error("Dashboard data error:", error);
-      } finally {
-        setLoading(false);
+      if (consumerResult.status === "fulfilled") {
+        setConsumerProfile(consumerResult.value);
+      } else {
+        console.error("Consumer profile error:", consumerResult.reason);
       }
+
+      if (claimsResult.status === "fulfilled") {
+        setClaims(claimsResult.value || []);
+        setLoadError("");
+      } else {
+        console.error("Claims error:", claimsResult.reason);
+        setLoadError("Unable to load your claims. Please refresh the page.");
+      }
+
+      setLoading(false);
     };
 
     loadDashboardData();
+
+    // Pick up status changes made by the company when the user
+    // comes back to this tab
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") {
+        loadDashboardData();
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
   }, [user?.id]);
 
   // ============================================
@@ -62,7 +83,7 @@ const ConsumerDashboard = () => {
   // LOADING
   // ============================================
 
-  if (loading || !profile || !consumerProfile) {
+  if (loading || !profile) {
     return (
       <div className="min-h-screen bg-[#f7f7f5] flex items-center justify-center px-6">
         <div className="flex flex-col items-center">
@@ -85,12 +106,13 @@ const ConsumerDashboard = () => {
 
   const totalClaims = claims.length;
 
-  const pendingClaims = claims.filter(
-    (claim) => claim.status?.toLowerCase() === "pending"
+  // Statuses match those set by the company: submitted, received, resolved
+  const submittedClaims = claims.filter(
+    (claim) => claim.status?.toLowerCase() === "submitted"
   ).length;
 
-  const approvedClaims = claims.filter(
-    (claim) => claim.status?.toLowerCase() === "approved"
+  const receivedClaims = claims.filter(
+    (claim) => claim.status?.toLowerCase() === "received"
   ).length;
 
   const resolvedClaims = claims.filter(
@@ -103,17 +125,14 @@ const ConsumerDashboard = () => {
 
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
-      case "approved":
+      case "submitted":
+        return "border-[#eadfc8] bg-[#fcf8ee] text-[#94733a]";
+
+      case "received":
         return "border-[#d8e4e8] bg-[#f2f7f8] text-[#477080]";
 
       case "resolved":
         return "border-[#d5e7df] bg-[#f2f8f5] text-[#3e735f]";
-
-      case "rejected":
-        return "border-[#f0d8d5] bg-[#fff7f6] text-[#a0524a]";
-
-      case "pending":
-        return "border-[#eadfc8] bg-[#fcf8ee] text-[#94733a]";
 
       default:
         return "border-[#e2e6e3] bg-[#f7f8f7] text-[#69726d]";
@@ -311,7 +330,7 @@ const ConsumerDashboard = () => {
                 </p>
 
                 <p className="mt-1.5 text-[13px] font-medium leading-5 text-[#303934]">
-                  {consumerProfile.phone || "Not available"}
+                  {consumerProfile?.phone || "Not available"}
                 </p>
 
               </div>
@@ -325,7 +344,7 @@ const ConsumerDashboard = () => {
                 </p>
 
                 <p className="mt-1.5 break-words text-[13px] font-medium leading-5 text-[#303934]">
-                  {consumerProfile.address || "Not available"}
+                  {consumerProfile?.address || "Not available"}
                 </p>
 
               </div>
@@ -432,7 +451,7 @@ const ConsumerDashboard = () => {
 
           </div>
 
-          {/* PENDING */}
+          {/* SUBMITTED */}
 
           <div className="group rounded-[20px] border border-[#e2e6e3] bg-white p-5 shadow-[0_10px_30px_rgba(24,39,34,0.035)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(24,39,34,0.06)]">
 
@@ -440,11 +459,11 @@ const ConsumerDashboard = () => {
 
               <div>
                 <p className="text-[12px] font-medium text-[#7c8580]">
-                  Pending
+                  Submitted
                 </p>
 
                 <p className="mt-2 text-[30px] font-semibold tracking-[-0.045em] text-[#1c2521]">
-                  {pendingClaims}
+                  {submittedClaims}
                 </p>
               </div>
 
@@ -471,7 +490,7 @@ const ConsumerDashboard = () => {
                 className="h-full rounded-full bg-[#b18a4c]"
                 style={{
                   width: totalClaims
-                    ? `${(pendingClaims / totalClaims) * 100}%`
+                    ? `${(submittedClaims / totalClaims) * 100}%`
                     : "0%",
                 }}
               />
@@ -479,7 +498,7 @@ const ConsumerDashboard = () => {
 
           </div>
 
-          {/* APPROVED */}
+          {/* RECEIVED */}
 
           <div className="group rounded-[20px] border border-[#e2e6e3] bg-white p-5 shadow-[0_10px_30px_rgba(24,39,34,0.035)] transition-all duration-200 hover:-translate-y-0.5 hover:shadow-[0_14px_35px_rgba(24,39,34,0.06)]">
 
@@ -487,11 +506,11 @@ const ConsumerDashboard = () => {
 
               <div>
                 <p className="text-[12px] font-medium text-[#7c8580]">
-                  Approved
+                  Received
                 </p>
 
                 <p className="mt-2 text-[30px] font-semibold tracking-[-0.045em] text-[#1c2521]">
-                  {approvedClaims}
+                  {receivedClaims}
                 </p>
               </div>
 
@@ -506,7 +525,7 @@ const ConsumerDashboard = () => {
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    d="m5.5 12 4.1 4.1L18.5 7"
+                    d="M4 13.5h4l1.5 2.5h5l1.5-2.5h4M5.75 5.25h12.5L20 13.5v4.75a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V13.5l1.75-8.25Z"
                   />
                 </svg>
               </div>
@@ -518,7 +537,7 @@ const ConsumerDashboard = () => {
                 className="h-full rounded-full bg-[#638895]"
                 style={{
                   width: totalClaims
-                    ? `${(approvedClaims / totalClaims) * 100}%`
+                    ? `${(receivedClaims / totalClaims) * 100}%`
                     : "0%",
                 }}
               />
@@ -578,6 +597,14 @@ const ConsumerDashboard = () => {
         {/* ======================================
             WARRANTY CLAIMS
         ====================================== */}
+
+        {loadError && (
+          <div className="mb-5 rounded-[13px] border border-[#ead9d6] bg-[#fcf5f3] px-4 py-3">
+            <p className="text-[12px] leading-5 text-[#8d554d]">
+              {loadError}
+            </p>
+          </div>
+        )}
 
         <section className="overflow-hidden rounded-[24px] border border-[#e2e6e3] bg-white shadow-[0_14px_45px_rgba(24,39,34,0.045)]">
 
