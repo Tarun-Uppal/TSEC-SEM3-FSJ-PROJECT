@@ -4,6 +4,17 @@ import { supabase } from "../lib/supabaseClient";
 // SIGN UP
 // ============================================
 
+/*
+  Profile rows are NOT created here. All signup details are saved in
+  the auth user's metadata, and the Complete Profile page creates the
+  rows on first login (see createProfileRows).
+
+  This works whether or not "Confirm email" is turned on in Supabase,
+  and is the same path used by email OTP and Google sign-ins.
+
+  Returns { user, needsConfirmation }.
+*/
+
 export async function signUpUser({
   email,
   password,
@@ -17,9 +28,13 @@ export async function signUpUser({
     email,
     password,
     options: {
+      emailRedirectTo: window.location.origin,
       data: {
         full_name: fullName,
         user_type: userType,
+        company_name: companyName || null,
+        phone: phone || null,
+        address: address || null,
       },
     },
   });
@@ -28,17 +43,48 @@ export async function signUpUser({
     throw error;
   }
 
-  const user = data.user;
-
-  if (!user) {
+  if (!data.user) {
     throw new Error("User was not created");
+  }
+
+  return {
+    user: data.user,
+    needsConfirmation: !data.session,
+  };
+}
+
+
+// ============================================
+// CREATE PROFILE ROWS
+// ============================================
+
+/*
+  Creates the profiles row plus the consumers or companies row
+  for a logged-in user who does not have a profile yet.
+*/
+
+export async function createProfileRows({
+  userId,
+  email,
+  fullName,
+  userType,
+  companyName,
+  phone,
+  address,
+}) {
+  if (!userId) {
+    throw new Error("User ID is required");
+  }
+
+  if (!["consumer", "company"].includes(userType)) {
+    throw new Error("Please choose an account type");
   }
 
   // Create common profile
   const { error: profileError } = await supabase
     .from("profiles")
     .insert({
-      id: user.id,
+      id: userId,
       full_name: fullName,
       email,
       user_type: userType,
@@ -54,7 +100,7 @@ export async function signUpUser({
     const { error: consumerError } = await supabase
       .from("consumers")
       .insert({
-        user_id: user.id,
+        user_id: userId,
         phone: phone || null,
         address: address || null,
       });
@@ -70,7 +116,7 @@ export async function signUpUser({
     const { error: companyError } = await supabase
       .from("companies")
       .insert({
-        user_id: user.id,
+        user_id: userId,
         company_name: companyName || null,
         contact_name: fullName,
         phone: phone || null,
@@ -82,8 +128,6 @@ export async function signUpUser({
       throw companyError;
     }
   }
-
-  return user;
 }
 
 
@@ -103,6 +147,75 @@ export async function loginUser({ email, password }) {
   }
 
   return data.user;
+}
+
+
+// ============================================
+// EMAIL OTP (CODE) LOGIN
+// ============================================
+
+/*
+  Sends a 6-digit code to the email address. If no account exists
+  yet, Supabase creates one and the user is sent to the Complete
+  Profile page after verifying the code.
+
+  The Supabase email templates must include {{ .Token }} for the
+  code to appear in the email.
+*/
+
+export async function sendEmailOtp(email) {
+  const { error } = await supabase.auth.signInWithOtp({
+    email,
+    options: {
+      shouldCreateUser: true,
+      emailRedirectTo: window.location.origin,
+    },
+  });
+
+  if (error) {
+    console.error("Email OTP send error:", error);
+    throw error;
+  }
+}
+
+export async function verifyEmailOtp({ email, token }) {
+  const { data, error } = await supabase.auth.verifyOtp({
+    email,
+    token,
+    type: "email",
+  });
+
+  if (error) {
+    console.error("Email OTP verify error:", error);
+    throw error;
+  }
+
+  return data.user;
+}
+
+
+// ============================================
+// GOOGLE LOGIN
+// ============================================
+
+/*
+  Redirects to Google. After signing in, Google sends the user back
+  to /login, where PublicRoute forwards them to their dashboard or
+  to the Complete Profile page.
+*/
+
+export async function signInWithGoogle() {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${window.location.origin}/login`,
+    },
+  });
+
+  if (error) {
+    console.error("Google login error:", error);
+    throw error;
+  }
 }
 
 
@@ -146,6 +259,8 @@ export async function getCurrentUser() {
 // GET COMMON USER PROFILE
 // ============================================
 
+// Returns null if the user has not completed their profile yet.
+
 export async function getUserProfile(userId) {
   if (!userId) {
     throw new Error("User ID is required");
@@ -155,7 +270,7 @@ export async function getUserProfile(userId) {
     .from("profiles")
     .select("id, full_name, email, user_type")
     .eq("id", userId)
-    .single();
+    .maybeSingle();
 
   if (error) {
     console.error("Profile fetch error:", error);

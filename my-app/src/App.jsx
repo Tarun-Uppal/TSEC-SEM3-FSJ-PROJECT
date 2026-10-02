@@ -9,6 +9,7 @@ import CompanyDashboard from "./pages/CompanyDashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PublicRoute from "./components/PublicRoute";
 import ClaimForm from "./pages/ClaimForm";
+import CompleteProfile from "./pages/CompleteProfile";
 
 function App() {
   return (
@@ -34,6 +35,9 @@ function App() {
           }
         />
 
+        {/* Logged in, but no profile yet (email OTP / Google) */}
+        <Route path="/complete-profile" element={<CompleteProfile />} />
+
         {/* Consumer */}
         <Route
           path="/consumer/dashboard"
@@ -54,7 +58,7 @@ function App() {
           }
         />
 
-        {/* Company */}
+        {/* Claim form */}
         <Route
           path="/ClaimForm"
           element={

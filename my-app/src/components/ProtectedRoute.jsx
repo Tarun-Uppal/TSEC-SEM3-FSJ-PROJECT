@@ -13,13 +13,17 @@ const ProtectedRoute = ({ children, allowedType }) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedType && profile?.user_type !== allowedType) {
-    if (profile?.user_type === "consumer") {
+  // New email OTP / Google users must finish their profile first
+  if (!profile) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
+  if (allowedType && profile.user_type !== allowedType) {
+    if (profile.user_type === "consumer") {
       return <Navigate to="/consumer/dashboard" replace />;
-      return <Navigate to="/ClaimForm" replace />;
     }
 
-    if (profile?.user_type === "company") {
+    if (profile.user_type === "company") {
       return <Navigate to="/company/dashboard" replace />;
     }
   }

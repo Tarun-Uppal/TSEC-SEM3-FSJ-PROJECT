@@ -9,6 +9,10 @@ const PublicRoute = ({ children }) => {
     return <div>Loading...</div>;
   }
 
+  if (user && !profile) {
+    return <Navigate to="/complete-profile" replace />;
+  }
+
   if (user && profile) {
     if (profile.user_type === "consumer") {
       return <Navigate to="/consumer/dashboard" replace />;
